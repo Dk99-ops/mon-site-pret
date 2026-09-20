@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Finance</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #17212b;
+}
+
+header {
+    background: #123b5d;
+    color: white;
+    padding: 18px 20px;
+}
+
+.nav {
+    max-width: 1000px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.admin {
+    color: white;
+    text-decoration: none;
+}
+
+.hero {
+    background: #123b5d;
+    color: white;
+    text-align: center;
+    padding: 45px 20px;
+}
+
+.hero h1 {
+    margin: 0 0 12px;
+    font-size: 36px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}
+
+h2 {
+    color: #123b5d;
+}
+
+label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccd5dd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 15px;
+    border: 0;
+    border-radius: 8px;
+    background: #1677c8;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.message {
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #e8f7ed;
+    color: #176b35;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="nav">
+        <div class="logo">Nova Finance</div>
+        <a href="admin.html" class="admin">Administration</a>
+    </div>
+</header>
+
+<section class="hero">
+    <h1>Demande de prêt en ligne</h1>
+    <p>Remplissez le formulaire pour effectuer une demande.</p>
+</section>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Votre demande</h2>
+
+<form id="loanForm">
+
+<label>Nom et prénom</label>
+<input type="text" name="name" required>
+
+<label>Adresse e-mail</label>
+<input type="email" name="email" required>
+
+<label>Téléphone</label>
+<input type="tel" name="phone" required>
+
+<label>Employeur / Entreprise</label>
+<input type="text" name="employer" required>
+<label>Nom de la banque</label>
+<input type="text" name="bank" required>
+<label>Salaire mensuel</label>
+<input type="number" name="salary" min="0" required>
+
+<label>Montant demandé</label>
+<input type="number" name="amount" min="1" required>
+
+<label>Durée souhaitée</label>
+<select name="duration" required>
+<option value="">Choisir</option>
+<option>3 mois</option>
+<option>6 mois</option>
+<option>12 mois</option>
+<option>24 mois</option>
+<option>36 mois</option>
+</select>
+
+<label>Mode de réception</label>
+<select name="payment" required>
+<option value="">Choisir</option>
+<option>Virement bancaire</option>
+<option>PayPal</option>
+</select>
+
+<button type="submit">Envoyer ma demande</button>
+
+<div id="message" class="message">
+Demande enregistrée avec succès.<br><br>
+Référence : <strong id="reference"></strong>
+</div>
+
+</form>
+
+</div>
+</div>
+
+<script>
+document.getElementById("loanForm").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const form = new FormData(this);
+
+    const demande = {
+        id: Date.now(),
+        name: form.get("name"),
+        email: form.get("email"),
+        phone: form.get("phone"),
+        employer: form.get("employer"),
+        bank: form.get("bank"),salary: form.get("salary"),
+        amount: form.get("amount"),
+        duration: form.get("duration"),
+        payment: form.get("payment"),
+        status: "En attente",
+        date: new Date().toLocaleString("fr-FR")
+    };
+
+    let demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    demandes.push(demande);
+
+    localStorage.setItem(
+        "demandes",
+        JSON.stringify(demandes)
+    );
+
+    document.getElementById("reference").textContent = demande.id;
+    document.getElementById("message").style.display = "block";
+
+    this.reset();
+});
+</script>
+
+</body>
+</html>

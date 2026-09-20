@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Administration - Nova Finance</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #17212b;
+}
+
+header {
+    background: #123b5d;
+    color: white;
+    padding: 20px;
+}
+
+.nav {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.back {
+    color: white;
+    text-decoration: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #eef3f7;
+}
+
+select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.delete {
+    background: #c62828;
+    color: white;
+    border: 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.empty {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init({ publicKey: "3djXa1k-de4h3QQdM" });
+</script>
+</head>
+
+<body>
+
+<header>
+<div class="nav">
+
+<div class="logo">
+Nova Finance — Administration
+</div>
+
+<a class="back" href="index.html">
+← Retour au site
+</a>
+
+</div>
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h1>Demandes de prêt</h1>
+
+<p id="count"></p>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+<tr>
+<th>Référence</th>
+<th>Demandeur</th>
+<th>Contact</th>
+<th>Employeur</th>
+<th>Banque</th>
+<th>Montant</th>
+<th>Durée</th>
+<th>Réception</th>
+<th>Date</th>
+<th>Statut</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="tableau"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function afficherDemandes() {
+
+    const demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    const tableau = document.getElementById("tableau");
+
+    document.getElementById("count").textContent =
+        demandes.length + " demande(s) enregistrée(s).";
+
+    if (demandes.length === 0) {
+
+        tableau.innerHTML = `
+            <tr>
+                <td colspan="10" class="empty">
+                    Aucune demande pour le moment.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    tableau.innerHTML = "";
+
+    demandes.forEach(function(demande, index) {
+
+        const ligne = document.createElement("tr");
+
+        ligne.innerHTML = `
+            <td>${demande.id}</td>
+
+            <td>${demande.name}</td>
+
+            <td>
+                ${demande.email}<br>
+                ${demande.phone}
+            </td>
+<td>${demande.bank}</td>
+            <td>${demande.employer}</td>
+
+            <td>${demande.amount}</td>
+
+            <td>${demande.duration}</td>
+
+            <td>${demande.payment}</td>
+
+            <td>${demande.date}</td>
+
+            <td>
+                <select onchange="changerStatut(${index}, this.value)">
+
+                    <option value="En attente"
+                        ${demande.status === "En attente" ? "selected" : ""}>
+                        En attente
+                    </option>
+
+                    <option value="Approuvée"
+                        ${demande.status === "Approuvée" ? "selected" : ""}>
+                        Approuvée
+                    </option>
+
+                    <option value="Refusée"
+                        ${demande.status === "Refusée" ? "selected" : ""}>
+                        Refusée
+                    </option>
+
+                </select>
+            </td>
+
+            <td>
+                <button
+                    class="delete"
+                    onclick="supprimerDemande(${index})">
+                    Supprimer
+                </button>
+            </td>
+        `;
+
+        tableau.appendChild(ligne);
+    });
+}
+
+
+function changerStatut(index, nouveauStatut) {
+
+    const demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    demandes[index].status = nouveauStatut;
+if (nouveauStatut === "Approuvée" || nouveauStatut === "Refusée") {
+    const demande = demandes[index];
+
+    emailjs.send(
+        "service_7r8te4x",
+        "template_xdy1i1f",
+        {
+            name: demande.name,
+            email: demande.email,
+            status: nouveauStatut,
+            amount: demande.amount,
+            duration: demande.duration
+        }
+    )
+    .then(function() {
+        alert("Statut enregistré et e-mail envoyé au demandeur.");
+    })
+    .catch(function(error) {
+        console.error("Erreur EmailJS :", error);
+        alert("Statut enregistré, mais l'e-mail n'a pas pu être envoyé.");
+    });
+}
+
+    localStorage.setItem(
+        "demandes",
+        JSON.stringify(demandes)
+    );
+
+    afficherDemandes();
+}
+
+
+function supprimerDemande(index) {
+
+    const demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    demandes.splice(index, 1);
+
+    localStorage.setItem(
+        "demandes",
+        JSON.stringify(demandes)
+    );
+
+    afficherDemandes();
+}
+
+
+afficherDemandes();
+
+</script>
+
+</body>
+</html>

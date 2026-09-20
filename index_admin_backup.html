@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Administration - Nova Finance</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #17212b;
+}
+
+header {
+    background: #123b5d;
+    color: white;
+    padding: 20px;
+}
+
+.nav {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.back {
+    color: white;
+    text-decoration: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+th,
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #eef3f7;
+}
+
+select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.delete {
+    background: #c62828;
+    color: white;
+    border: 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.empty {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="nav">
+
+<div class="logo">
+Nova Finance — Administration
+</div>
+
+<a class="back" href="index.html">
+← Retour au site
+</a>
+
+</div>
+
+</header>
+
+
+<div class="container">
+
+<div class="card">
+
+<h1>Demandes de prêt</h1>
+
+<p id="count"></p>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Référence</th>
+<th>Demandeur</th>
+<th>Contact</th>
+<th>Employeur</th>
+<th>Montant</th>
+<th>Durée</th>
+<th>Réception</th>
+<th>Date</th>
+<th>Statut</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="tableau"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+function afficherDemandes() {
+
+    const demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    const tableau = document.getElementById("tableau");
+
+    document.getElementById("count").textContent =
+        demandes.length + " demande(s) enregistrée(s).";
+
+
+    if (demandes.length === 0) {
+
+        tableau.innerHTML = `
+            <tr>
+                <td colspan="10" class="empty">
+                    Aucune demande pour le moment.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    tableau.innerHTML = "";
+
+
+    demandes.forEach(function(demande, index) {
+
+        const ligne = document.createElement("tr");
+
+        ligne.innerHTML = `
+
+            <td>${demande.id}</td>
+
+            <td>${demande.name}</td>
+
+            <td>
+                ${demande.email}<br>
+                ${demande.phone}
+            </td>
+
+            <td>${demande.employer}</td>
+
+            <td>${demande.amount}</td>
+
+            <td>${demande.duration}</td>
+
+            <td>${demande.payment}</td>
+
+            <td>${demande.date}</td>
+
+            <td>
+
+                <select
+                    onchange="changerStatut(${index}, this.value)"
+                >
+
+                    <option ${demande.status === "En attente" ? "selected" : ""}>
+                        En attente
+                    </option>
+
+                    <option ${demande.status === "Approuvée" ? "selected" : ""}>
+                        Approuvée
+                    </option>
+
+                    <option ${demande.status === "Refusée" ? "selected" : ""}>
+                        Refusée
+                    </option>
+
+                </select>
+
+            </td>
+
+            <td>
+
+                <button
+                    class="delete"
+                    onclick="supprimerDemande(${index})"
+                >
+                    Supprimer
+                </button>
+
+            </td>
+        `;
+
+        tableau.appendChild(ligne);
+    });
+}
+
+
+function changerStatut(index, nouveauStatut) {
+
+    const demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    demandes[index].status = nouveauStatut;
+
+    localStorage.setItem(
+        "demandes",
+        JSON.stringify(demandes)
+    );
+
+    afficherDemandes();
+}
+
+
+function supprimerDemande(index) {
+
+    const demandes = JSON.parse(
+        localStorage.getItem("demandes") || "[]"
+    );
+
+    demandes.splice(index, 1);
+
+    localStorage.setItem(
+        "demandes",
+        JSON.stringify(demandes)
+    );
+
+    afficherDemandes();
+}
+
+
+afficherDemandes();
+
+</script>
+
+</body>
+
+</html>
